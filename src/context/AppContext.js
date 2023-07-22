@@ -21,15 +21,17 @@ export const AppProvider = ({ children }) => {
   const loginWithGoogle = async () => {
     try {
       const provider = new firebase.auth.GoogleAuthProvider();
-      const userCredential = await firebase.auth().signInWithPopup(provider);
+      const { idToken } = await firebase.auth().signInWithPopup(provider); // Use o método signInWithCredential para obter o idToken
+      const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+      const userCredential = await firebase.auth().signInWithCredential(credential);
       console.log('Login com o Google bem-sucedido:', userCredential.user);
-      setUser(userCredential.user); 
+      setUser(userCredential.user);
     } catch (error) {
-      
       console.error('Erro no login com o Google:', error);
       throw error;
     }
   };
+  
 
   return (
     <AppContext.Provider value={{ cartItems, setCartItems, user, login, loginWithGoogle }}>

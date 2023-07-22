@@ -31,41 +31,7 @@ export default function TelaPrincipal() {
       setSelectedProduct(product);
     };
 
-    const askProductQuestion = async (question, productId) => {
-      try {
-        const apiKey = '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'; // Substitua YOUR_API_KEY pela sua chave de API da OpenAI
-    
-        const headers = {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        };
-    
-        const data = {
-          "prompt": `Descriçao do produti: ${productId} \nQuestion: ${question}`,
-          "model": "text-davinci-003",
-          "max_tokens": 1024,
-          "temperature": 0,
-        };
-    
-        const apiUrl = 'https://api.openai.com/v1/completions';
-    
-        const response = await axios.post(apiUrl, data, { headers });
-    
-        if (response.data && response.data.choices && response.data.choices.length > 0) {
-          const answer = response.data.choices[0].text.trim();
-    
-          setProductQuestions((prevProductQuestions) => [
-            ...prevProductQuestions,
-            { question, answer },
-          ]);
-        } else {
-          throw new Error('Resposta vazia ou formato de resposta inválido.');
-        }
-      } catch (error) {
-        console.error('Erro ao obter resposta da API da OpenAI:', error);
-      }
-    };
-    
+  
     return (
       <TouchableOpacity
         key={index}
