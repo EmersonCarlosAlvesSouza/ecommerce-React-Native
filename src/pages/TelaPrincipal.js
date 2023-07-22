@@ -1,14 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView, Modal } from 'react-native';
 import { AppContext } from '../context/AppContext';
+import axios from 'axios';
+import {ChatBox} from '../components/chatbot'
 
 export default function TelaPrincipal() {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { cartItems, setCartItems, user } = useContext(AppContext);
-  console.log(user.photoURL)
+  const [productQuestions, setProductQuestions] = useState([]);
 
+
+
+  
   useEffect(() => {
     fetch('https://fakestoreapi.com/products')
       .then((res) => res.json())
@@ -20,11 +25,47 @@ export default function TelaPrincipal() {
       });
   }, []);
 
+  
   const renderCard = (product, index) => {
     const handleCardPress = () => {
       setSelectedProduct(product);
     };
 
+    const askProductQuestion = async (question, productId) => {
+      try {
+        const apiKey = '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'; // Substitua YOUR_API_KEY pela sua chave de API da OpenAI
+    
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        };
+    
+        const data = {
+          "prompt": `Descriçao do produti: ${productId} \nQuestion: ${question}`,
+          "model": "text-davinci-003",
+          "max_tokens": 1024,
+          "temperature": 0,
+        };
+    
+        const apiUrl = 'https://api.openai.com/v1/completions';
+    
+        const response = await axios.post(apiUrl, data, { headers });
+    
+        if (response.data && response.data.choices && response.data.choices.length > 0) {
+          const answer = response.data.choices[0].text.trim();
+    
+          setProductQuestions((prevProductQuestions) => [
+            ...prevProductQuestions,
+            { question, answer },
+          ]);
+        } else {
+          throw new Error('Resposta vazia ou formato de resposta inválido.');
+        }
+      } catch (error) {
+        console.error('Erro ao obter resposta da API da OpenAI:', error);
+      }
+    };
+    
     return (
       <TouchableOpacity
         key={index}
@@ -101,6 +142,20 @@ export default function TelaPrincipal() {
           </View>
         </View>
       </Modal>
+     
+      <ChatBox
+        user={user}
+        product={products}
+      />
+
+      <View style={styles.productQuestionsContainer}>
+        {productQuestions.map((item, index) => (
+          <View key={index} style={styles.productQuestionItem}>
+            <Text style={styles.productQuestion}>{item.question}</Text>
+            <Text style={styles.productAnswer}>{item.answer}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -116,6 +171,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
+  
+  
+  
   userImage: {
     width: 40,
     height: 40,
@@ -174,8 +232,18 @@ const styles = StyleSheet.create({
   },
   category: {
     fontSize: 12,
+    color: 'gray',
+    marginBottom: 10,
   },
-  // Estilos do Modal
+  askQuestionButton: {
+    backgroundColor: '#3e8eb5',
+    padding: 8,
+    borderRadius: 5,
+  },
+  askQuestionButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
   modalContainer: {
     flex: 1,
     alignItems: 'center',
@@ -186,32 +254,33 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 20,
-    margin: 20,
+    marginHorizontal: 20,
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   modalPrice: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   modalDescription: {
     fontSize: 14,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   modalCategory: {
     fontSize: 14,
+    color: 'gray',
     marginBottom: 10,
   },
   addToCartButton: {
-    backgroundColor: 'blue',
-    padding: 10,
+    backgroundColor: '#3e8eb5',
+    padding: 8,
     borderRadius: 5,
-    marginTop: 10,
-    alignItems: 'center',
+    marginBottom: 10,
   },
   addToCartButtonText: {
     color: 'white',
@@ -219,13 +288,26 @@ const styles = StyleSheet.create({
   },
   closeModalButton: {
     backgroundColor: 'gray',
-    padding: 10,
+    padding: 8,
     borderRadius: 5,
-    marginTop: 10,
-    alignItems: 'center',
   },
   closeModalButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  productQuestionsContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  productQuestionItem: {
+    marginBottom: 10,
+  },
+  productQuestion: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  productAnswer: {
+    fontSize: 12,
+    marginLeft: 10,
   },
 });

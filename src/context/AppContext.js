@@ -11,7 +11,6 @@ export const AppProvider = ({ children }) => {
     try {
       const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
      
-      console.log('Login bem-sucedido:', userCredential.user);
       setUser(userCredential.user); 
     } catch (error) {
       console.error('Erro no login:', error);
