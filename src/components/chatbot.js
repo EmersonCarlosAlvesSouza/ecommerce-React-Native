@@ -15,7 +15,7 @@ export const ChatBox = ({ onSendMessage, user, product }) => {
   const askProductQuestion = async (question, productId) => {
     console.log(product)
     try {
-      const apiKey = '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'; // Substitua YOUR_API_KEY pela sua chave de API da OpenAI
+      const apiKey = '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'; // Substitua YOUR_API_KEY pela sua chave de API da OpenAI
 
       const headers = {
         'Content-Type': 'application/json',
@@ -35,8 +35,6 @@ export const ChatBox = ({ onSendMessage, user, product }) => {
 
       if (response.data && response.data.choices && response.data.choices.length > 0) {
         const answer = response.data.choices[0].text.trim();
-
-        // Adicionar a resposta da OpenAI ao estado de respostas
         
         setMessages((prevMessages) => [
           ...prevMessages,
